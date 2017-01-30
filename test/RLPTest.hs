@@ -20,7 +20,7 @@ import           Development.IncludeFile
 import qualified Data.RLP                as RLP
 
 data RLPTestInput = StringInput ByteString
-                  | NumberInput Int
+                  | NumberInput Integer
                   | ListInput [RLPTestInput]
                   deriving (Read, Show)
 
@@ -35,7 +35,7 @@ instance Eq RLPTestInput where
     (ListInput l1)   == (ListInput l2)   = l1 == l2
 
     StringInput{}   ==  ListInput{}    = False -- impossible
-    (StringInput s) == (NumberInput n) = RLP.unpackNumBE (unpack s) == n -- todo this case
+    (StringInput s) == (NumberInput n) = RLP.unpackBE (unpack s) == n -- todo this case
 
     NumberInput{}   ==  ListInput{}    = False -- also impossible
     n@NumberInput{} == s@StringInput{} = s == n -- take advantage of the commutative case
@@ -54,7 +54,10 @@ data RLPTest = RLPTest { input :: RLPTestInput, output :: T.Text }
     deriving (Eq, Read, Show)
 
 instance FromJSON RLPTestInput where
-    parseJSON (String s) = return . StringInput $ TE.encodeUtf8 s
+    parseJSON (String s) | T.null s  = return (StringInput "")
+                         | otherwise = case T.head s of
+                            '#' -> return . NumberInput . read . T.unpack $ T.tail s
+                            _   -> return . StringInput $ TE.encodeUtf8 s
     parseJSON (Number n) = return . NumberInput $ round n
     parseJSON (Array a)  = ListInput . V.toList <$> V.forM a parseJSON
     parseJSON x          = typeMismatch "RLPTestInput" x

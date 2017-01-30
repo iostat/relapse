@@ -37,8 +37,6 @@ resolver: lts-7.17
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
-- location: './include-file-0.1.1.0'
-  extra-dep: true
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: []
