@@ -7,12 +7,15 @@ module Data.RLP
     , unpackRLP
     , unpackRLPFully
     , packRLP
+    , rlpSerialize
+    , rlpDeserialize
     , module Data.RLP.Types
     ) where
 
 import           Control.Applicative        ((<|>))
 import           Data.Attoparsec.ByteString
 import           Data.Attoparsec.Combinator
+import           Control.Monad ((<=<))
 import           Data.Bits                  (Bits, FiniteBits, finiteBitSize,
                                              shiftL, shiftR, (.|.))
 import qualified Data.ByteString            as S
@@ -111,3 +114,9 @@ packRLP o = case o of
                     pLen     = S.pack (packFiniteBE len)
                     pLenLen  = fromIntegral (S.length pLen)
                     prefixed = base + pLenLen
+
+rlpSerialize :: RLPEncodable a => a -> S.ByteString
+rlpSerialize = packRLP . rlpEncode
+
+rlpDeserialize :: RLPEncodable a => S.ByteString -> Either String a
+rlpDeserialize = rlpDecode <=< unpackRLP

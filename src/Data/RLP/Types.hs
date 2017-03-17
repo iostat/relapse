@@ -15,6 +15,9 @@ import           Data.Word
 
 data RLPObject = String S.ByteString | Array [RLPObject] deriving (Eq, Ord, Read, Show)
 
+rlp0 :: RLPObject
+rlp0 = String (S.singleton 0x80)
+
 class RLPEncodable a where
     rlpEncode :: a -> RLPObject
     rlpDecode :: RLPObject -> Either String a
@@ -68,7 +71,7 @@ instance RLPEncodable S.ByteString where
         String s -> Right s
         x        -> rlpDecodeFail "String" x
 
-instance RLPEncodable String where
+instance {-# OVERLAPPING #-} RLPEncodable String where
     rlpEncode = String . S8.pack
     rlpDecode = \case
         String s -> Right (S8.unpack s)
@@ -90,11 +93,111 @@ instance RLPEncodable Word64 where
     rlpEncode = rlpEncodeFinite
     rlpDecode = rlpDecodeIntegralBE
 
-instance (RLPEncodable a) => RLPEncodable [a] where
+instance {-# OVERLAPPABLE #-} (RLPEncodable a) => RLPEncodable [a] where
     rlpEncode = Array . toList . fmap rlpEncode
     rlpDecode = \case
         Array xs -> sequence $ rlpDecode <$> xs
         x        -> rlpDecodeFail "Array" x
+
+instance RLPEncodable () where
+    rlpEncode _ = rlp0
+    rlpDecode x = if x == rlp0 then return () else rlpDecodeFail "()" x
+
+instance (RLPEncodable a, RLPEncodable b) => RLPEncodable (a,b) where
+    rlpEncode (a,b) = Array [rlpEncode a,rlpEncode b]
+    rlpDecode = \case
+      Array [a,b] -> (,) <$> rlpDecode a <*> rlpDecode b
+      x           -> rlpDecodeFail "Pair" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  ) => RLPEncodable (a,b,c) where
+  rlpEncode (a,b,c) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    ]
+  rlpDecode = \case
+    Array [a,b,c] -> (,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+    x           -> rlpDecodeFail "Triple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  ) => RLPEncodable (a,b,c,d) where
+  rlpEncode (a,b,c,d) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d] -> (,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+    x           -> rlpDecodeFail "Quadruple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  , RLPEncodable e
+  ) => RLPEncodable (a,b,c,d,e) where
+  rlpEncode (a,b,c,d,e) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    , rlpEncode e
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d,e] -> (,,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+      <*> rlpDecode e
+    x           -> rlpDecodeFail "Quintuple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  , RLPEncodable e
+  , RLPEncodable f
+  ) => RLPEncodable (a,b,c,d,e,f) where
+  rlpEncode (a,b,c,d,e,f) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    , rlpEncode e
+    , rlpEncode f
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d,e,f] -> (,,,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+      <*> rlpDecode e
+      <*> rlpDecode f
+    x           -> rlpDecodeFail "Sextuple" x
+
+instance RLPEncodable a => RLPEncodable (Maybe a) where
+    rlpEncode = maybe rlp0 rlpEncode
+    rlpDecode x = if x == rlp0 then return Nothing else Just <$> rlpDecode x
 
 instance RLPEncodable RLPObject where -- ayy lmao
     rlpEncode = id
