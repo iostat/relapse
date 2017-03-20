@@ -124,7 +124,7 @@ instance
       <$> rlpDecode a
       <*> rlpDecode b
       <*> rlpDecode c
-    x           -> rlpDecodeFail "Triple" x
+    x -> rlpDecodeFail "Triple" x
 
 instance
   ( RLPEncodable a
@@ -144,7 +144,7 @@ instance
       <*> rlpDecode b
       <*> rlpDecode c
       <*> rlpDecode d
-    x           -> rlpDecodeFail "Quadruple" x
+    x -> rlpDecodeFail "Quadruple" x
 
 instance
   ( RLPEncodable a
@@ -167,7 +167,7 @@ instance
       <*> rlpDecode c
       <*> rlpDecode d
       <*> rlpDecode e
-    x           -> rlpDecodeFail "Quintuple" x
+    x -> rlpDecodeFail "Quintuple" x
 
 instance
   ( RLPEncodable a
@@ -193,7 +193,103 @@ instance
       <*> rlpDecode d
       <*> rlpDecode e
       <*> rlpDecode f
-    x           -> rlpDecodeFail "Sextuple" x
+    x -> rlpDecodeFail "Sextuple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  , RLPEncodable e
+  , RLPEncodable f
+  , RLPEncodable g
+  ) => RLPEncodable (a,b,c,d,e,f,g) where
+  rlpEncode (a,b,c,d,e,f,g) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    , rlpEncode e
+    , rlpEncode f
+    , rlpEncode g
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d,e,f,g] -> (,,,,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+      <*> rlpDecode e
+      <*> rlpDecode f
+      <*> rlpDecode g
+    x -> rlpDecodeFail "Septuple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  , RLPEncodable e
+  , RLPEncodable f
+  , RLPEncodable g
+  , RLPEncodable h
+  ) => RLPEncodable (a,b,c,d,e,f,g,h) where
+  rlpEncode (a,b,c,d,e,f,g,h) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    , rlpEncode e
+    , rlpEncode f
+    , rlpEncode g
+    , rlpEncode h
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d,e,f,g,h] -> (,,,,,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+      <*> rlpDecode e
+      <*> rlpDecode f
+      <*> rlpDecode g
+      <*> rlpDecode h
+    x -> rlpDecodeFail "Octuple" x
+
+instance
+  ( RLPEncodable a
+  , RLPEncodable b
+  , RLPEncodable c
+  , RLPEncodable d
+  , RLPEncodable e
+  , RLPEncodable f
+  , RLPEncodable g
+  , RLPEncodable h
+  , RLPEncodable i
+  ) => RLPEncodable (a,b,c,d,e,f,g,h,i) where
+  rlpEncode (a,b,c,d,e,f,g,h,i) = Array
+    [ rlpEncode a
+    , rlpEncode b
+    , rlpEncode c
+    , rlpEncode d
+    , rlpEncode e
+    , rlpEncode f
+    , rlpEncode g
+    , rlpEncode h
+    , rlpEncode i
+    ]
+  rlpDecode = \case
+    Array [a,b,c,d,e,f,g,h,i] -> (,,,,,,,,)
+      <$> rlpDecode a
+      <*> rlpDecode b
+      <*> rlpDecode c
+      <*> rlpDecode d
+      <*> rlpDecode e
+      <*> rlpDecode f
+      <*> rlpDecode g
+      <*> rlpDecode h
+      <*> rlpDecode i
+    x -> rlpDecodeFail "Nontuple" x
 
 instance RLPEncodable a => RLPEncodable (Maybe a) where
     rlpEncode = maybe rlp0 rlpEncode
