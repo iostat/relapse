@@ -1,6 +1,7 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase        #-}
-{-# OPTIONS -fno-warn-orphans  #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE LambdaCase           #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS -fno-warn-orphans     #-}
 module Data.RLP.Types where
 
 import qualified Data.ByteString       as S
@@ -71,26 +72,12 @@ instance RLPEncodable S.ByteString where
         String s -> Right s
         x        -> rlpDecodeFail "String" x
 
-instance {-# OVERLAPPING #-} RLPEncodable String where
-    rlpEncode = String . S8.pack
-    rlpDecode = \case
-        String s -> Right (S8.unpack s)
-        x        -> rlpDecodeFail "String" x
-
-instance RLPEncodable Int where
+instance {-# OVERLAPPABLE #-} (Integral n, FiniteBits n) => RLPEncodable n where
     rlpEncode = rlpEncodeFinite
     rlpDecode = rlpDecodeIntegralBE
 
-instance RLPEncodable Word16 where
-    rlpEncode = rlpEncodeFinite
-    rlpDecode = rlpDecodeIntegralBE
-
-instance RLPEncodable Word32 where
-    rlpEncode = rlpEncodeFinite
-    rlpDecode = rlpDecodeIntegralBE
-
-instance RLPEncodable Word64 where
-    rlpEncode = rlpEncodeFinite
+instance RLPEncodable Integer where
+    rlpEncode = rlpEncode . S.pack . packIntegerBE
     rlpDecode = rlpDecodeIntegralBE
 
 instance {-# OVERLAPPABLE #-} (RLPEncodable a) => RLPEncodable [a] where
@@ -98,6 +85,12 @@ instance {-# OVERLAPPABLE #-} (RLPEncodable a) => RLPEncodable [a] where
     rlpDecode = \case
         Array xs -> sequence $ rlpDecode <$> xs
         x        -> rlpDecodeFail "Array" x
+
+instance {-# OVERLAPPING #-} RLPEncodable String where
+    rlpEncode = String . S8.pack
+    rlpDecode = \case
+        String s -> Right (S8.unpack s)
+        x        -> rlpDecodeFail "String" x
 
 instance RLPEncodable () where
     rlpEncode _ = rlp0
@@ -298,10 +291,6 @@ instance RLPEncodable a => RLPEncodable (Maybe a) where
 instance RLPEncodable RLPObject where -- ayy lmao
     rlpEncode = id
     rlpDecode = Right
-
-instance RLPEncodable Integer where
-    rlpEncode = rlpEncode . S.pack . packIntegerBE
-    rlpDecode = rlpDecodeIntegralBE
 
 instance RLPEncodable Char where
     rlpEncode = rlpEncodeFinite . ord
