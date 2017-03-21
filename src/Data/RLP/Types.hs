@@ -17,7 +17,7 @@ import           Data.Word
 data RLPObject = String S.ByteString | Array [RLPObject] deriving (Eq, Ord, Read, Show)
 
 rlp0 :: RLPObject
-rlp0 = String (S.singleton 0x80)
+rlp0 = String S.empty
 
 class RLPEncodable a where
     rlpEncode :: a -> RLPObject
@@ -283,10 +283,6 @@ instance
       <*> rlpDecode h
       <*> rlpDecode i
     x -> rlpDecodeFail "Nontuple" x
-
-instance RLPEncodable a => RLPEncodable (Maybe a) where
-    rlpEncode = maybe rlp0 rlpEncode
-    rlpDecode x = if x == rlp0 then return Nothing else Just <$> rlpDecode x
 
 instance RLPEncodable RLPObject where -- ayy lmao
     rlpEncode = id
