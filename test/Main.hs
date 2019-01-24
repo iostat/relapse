@@ -12,12 +12,13 @@ import qualified Test.Tasty             as Tasty
 import           Test.Tasty.Hspec
 
 import           Data.RLP
+import           GenericRLPTest
 import           RLPTest
 
 main :: IO ()
 main = do
     putStrLn "" -- cabal doesn't put a \n before running the test and that makes me D:<
-    test <- testSpec "ReLaPse" specsFromJSON
+    test <- testSpec "ReLaPse" (genericSpec >> specsFromJSON)
     Tasty.defaultMain test
 
 specsFromJSON :: Spec

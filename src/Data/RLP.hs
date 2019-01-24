@@ -13,9 +13,9 @@ module Data.RLP
     ) where
 
 import           Control.Applicative        ((<|>))
+import           Control.Monad              ((<=<))
 import           Data.Attoparsec.ByteString
 import           Data.Attoparsec.Combinator
-import           Control.Monad ((<=<))
 import           Data.Bits                  (Bits, FiniteBits, finiteBitSize,
                                              shiftL, shiftR, (.|.))
 import qualified Data.ByteString            as S
@@ -27,9 +27,9 @@ import           Prelude                    hiding (take)
 import qualified Prelude                    as P
 
 import           Data.RLP.Types
-import           Debug.Trace
+
 singleByteParser :: Parser RLPObject
-singleByteParser = (String . S.singleton) <$> satisfy (<= 0x7F)
+singleByteParser = String . S.singleton <$> satisfy (<= 0x7F)
 
 shortParser :: Word8 -> (a -> RLPObject) -> (S.ByteString -> Parser a) -> a -> Parser RLPObject
 shortParser base constructor postProcessor def = do
