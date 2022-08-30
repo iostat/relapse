@@ -1,5 +1,5 @@
 name:                relapse
-version:             1.0.0.0
+version:             1.0.0.1
 synopsis:            Sensible RLP encoding
 description:         An implementation of RLP as specified in the Ethereum Wiki, using Attoparsec
 homepage:            https://github.com/iostat/relapse#readme
