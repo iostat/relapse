@@ -16,6 +16,7 @@ import qualified Data.ByteString           as S
 import qualified Data.ByteString.Base16    as SB16
 import qualified Data.ByteString.Char8     as S8
 
+import           Test.Hspec
 import           Test.QuickCheck
 import           Test.QuickCheck.Arbitrary
 import qualified Test.Tasty                as Tasty
