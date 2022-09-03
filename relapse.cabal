@@ -33,6 +33,7 @@ test-suite relapse-test
                      , text
                      , vector
                      , aeson
+                     , hspec
                      , tasty
                      , tasty-hspec
                      , include-file

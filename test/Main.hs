@@ -8,6 +8,7 @@ import qualified Data.Text.Encoding     as TE
 import qualified Data.ByteString        as S
 import qualified Data.ByteString.Base16 as SB16
 
+import           Test.Hspec
 import qualified Test.Tasty             as Tasty
 import           Test.Tasty.Hspec
 
@@ -41,7 +42,7 @@ makeTest (name, test) = describe (T.unpack name) $ do
         decOutput `shouldSatisfy` didDecodeFully
 
     when (didDecodeFully decOutput) $ do
-        let (theOutput, _) = decOutput
+        let Right theOutput = decOutput
         describe "the input" $ do
             let theInput  = input test
                 theEncode = rlpEncode theInput
@@ -79,6 +80,5 @@ makeTest (name, test) = describe (T.unpack name) $ do
                                 du' `shouldBe` theInput
 
 
-didDecodeFully :: (S.ByteString, S.ByteString) -> Bool
-didDecodeFully (_, "") = True
-didDecodeFully (_, _)  = False
+didDecodeFully :: Either String S.ByteString -> Bool
+didDecodeFully = isRight
